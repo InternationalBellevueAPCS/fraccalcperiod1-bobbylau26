@@ -1,21 +1,24 @@
 /* Bobby Lau
    APCS Period 1
-   December 3, 2018 */
+   December 6, 2018
+   Checkpoint 2 */
 
 import java.util.*;
 
 public class FracCalc {
 
     /**
-     * Prompts user to input an arithmetic expression, passes that input to produceAnswer() and then prints the second operand.
+     * Continually prompts user to input an arithmetic expression, passes that input to produceAnswer() and then prints the components of the second operand
+     * until user enters "quit".
      */
     public static void main(String[] args) {
-        // Checkpoint 2: Accept user input multiple times.
-    	
     	Scanner console = new Scanner(System.in);
     	String expression = console.nextLine();
-    	String expressionAnswer = produceAnswer(expression);
-    	System.out.print(expressionAnswer);
+    	while (!expression.equalsIgnoreCase("quit")) {
+        	String expressionAnswer = produceAnswer(expression);
+        	System.out.println(expressionAnswer);
+    		expression = console.nextLine();
+    	}
     }
     
     /**
@@ -36,15 +39,35 @@ public class FracCalc {
     	String restOfExpression = input.substring(input.indexOf(" ") + 1);
     	String operator = restOfExpression.substring(0, restOfExpression.indexOf(" "));
     	String operand2 = restOfExpression.substring(restOfExpression.indexOf(" ") + 1);
+    	// Break up operands into whole number, numerator, and denominator
+    	String whole1;
+    	String numerator1;
+    	String denominator1;
+    	String whole2;
+    	String numerator2;
+    	String denominator2;
+    	if (operand2.contains("_")) { // If the second operand is a mixed number
+    		whole2 = operand2.substring(0, operand2.indexOf('_'));
+    		numerator2 = operand2.substring(operand2.indexOf('_') + 1, operand2.indexOf('/'));
+    		denominator2 = operand2.substring(operand2.indexOf('/') + 1);
+    	}
+    	else if (operand2.contains("/")) { // If the second operand is only a fraction (whole number is 0)
+    		whole2 = "0";
+    		numerator2 = operand2.substring(0, operand2.indexOf('/'));
+    		denominator2 = operand2.substring(operand2.indexOf('/') + 1);
+    	}
+    	else { // If the second operand is only an integer (numerator is 0, denominator is 1)
+    		whole2 = operand2;
+			numerator2 = "0";
+			denominator2 = "1";
+    	}   		
     	
-        // Checkpoint 2: Return the second operand as a string representing each part.
-        //               Example "4/5 * 1_2/4" returns "whole:1 numerator:2 denominator:4".
         // Checkpoint 3: Evaluate the formula and return the result as a fraction.
         //               Example "4/5 * 1_2/4" returns "6/5".
         //               Note: Answer does not need to be reduced, but it must be correct.
         // Final project: All answers must be reduced.
         //               Example "4/5 * 1_2/4" returns "1_1/5".
-        return operand2;
+        return ("whole:" + whole2 + " numerator:" + numerator2 + " denominator:" + denominator2);
     }
 
     // TODO: Fill in the space below with helper methods

@@ -1,7 +1,7 @@
 /* Bobby Lau
    APCS Period 1
-   December 10, 2018
-   Checkpoint 3 */
+   December 13, 2018
+   Final */
 
 import java.util.*;
 
@@ -15,38 +15,29 @@ public class FracCalc {
     	Scanner console = new Scanner(System.in);
     	String expression = console.nextLine();
     	while (!expression.equalsIgnoreCase("quit")) {
-        	String expressionAnswer = produceAnswer(expression);
-        	System.out.println(expressionAnswer);
+        	System.out.println(produceAnswer(expression));
     		expression = console.nextLine();
     	}
     }
     
     /**
      * produceAnswer - This function takes a String 'expression' and produces the result.
-     * @param expression - A fraction string that needs to be evaluated.  For your program, this will be the user input.
+     * @param expression - A fraction string that needs to be evaluated
      *      Example: input ==> "1/2 + 3/4"
-     * @return the result of the fraction after it has been calculated.
+     * @return the calculated result of the expression
      *      Example: return ==> "1_1/4"
      */
     public static String produceAnswer(String expression) {
-        /* Break up line of input into the following strings:
-           1. First operand
-           2. Arithmetic operator (+ - * /)
-           3. Second operand
-        */
+        // Break up expression into first operand, arithmetic operator (+ - * /) and second operand
     	String operand1 = expression.substring(0, expression.indexOf(" "));
     	String restOfExpression = expression.substring(expression.indexOf(" ") + 1);
     	String operator = restOfExpression.substring(0, restOfExpression.indexOf(" "));
     	String operand2 = restOfExpression.substring(restOfExpression.indexOf(" ") + 1);
     	
+    	// Break up first operand into whole number, numerator and denominator
     	int whole1;
     	int numerator1;
     	int denominator1;
-    	int whole2;
-    	int numerator2;
-    	int denominator2;
-    	
-    	// Break up each operand into whole number, numerator and denominator
     	if (operand1.contains("_")) { // The first operand is a mixed number
     		whole1 = Integer.parseInt(operand1.substring(0, operand1.indexOf('_')));
     		numerator1 = Integer.parseInt(operand1.substring(operand1.indexOf('_') + 1, operand1.indexOf('/')));
@@ -62,6 +53,11 @@ public class FracCalc {
 			numerator1 = 0;
 			denominator1 = 1;
     	}
+    	
+    	// Break up second operand into whole number, numerator and denominator
+    	int whole2;
+    	int numerator2;
+    	int denominator2;
     	if (operand2.contains("_")) { // The second operand is a mixed number
     		whole2 = Integer.parseInt(operand2.substring(0, operand2.indexOf('_')));
     		numerator2 = Integer.parseInt(operand2.substring(operand2.indexOf('_') + 1, operand2.indexOf('/')));
@@ -85,15 +81,16 @@ public class FracCalc {
         	return(multiplyOrDivide(whole1, numerator1, denominator1, whole2, numerator2, denominator2, operator.equals("*")));
     }
     
-    // Final project: All answers must be reduced.
-    //                Example "4/5 * 1_2/4" returns "1_1/5".
+    /**
+     * Calculate the sum or difference of the expression.
+     */
     public static String addOrSubtract(int whole1, int num1, int den1, int whole2, int num2, int den2, boolean add) {
     	int commonDen;
 		int newNum;
     	if (num1 == 0) // The first operand is an integer
     		num1 = whole1;
     	else
-    		if ((whole1 != 0) && (num1 != 0)) { // The first operand is a mixed number
+    		if ((whole1 != 0) && (num1 != 0)) { // The first operand is a mixed number.  Convert it to an improper fraction before calculating.
     			num1 = (den1 * Math.abs(whole1)) + num1;
     			if (whole1 < 0)
     				num1 *= -1;
@@ -101,53 +98,75 @@ public class FracCalc {
     	if (num2 == 0) // The second operand is an integer
     		num2 = whole2;
     	else
-    		if ((whole2 != 0) && (num2 != 0)) { // The second operand is a mixed number
+    		if ((whole2 != 0) && (num2 != 0)) { // The second operand is a mixed number.  Convert it to an improper fraction before calculating.
     			num2 = (den2 * Math.abs(whole2)) + num2;
     			if (whole2 < 0)
     				num2 *= -1;
 			}
     	
-    	if (den1 != den2) { // If denominators are different, then find the lowest common denominator
+    	if (den1 != den2) { // If the denominators of the two operands are different, then rewrite both values using their lowest common denominator
     		commonDen = leastCommonMultiple(den1, den2);
     		int multiplier1 = commonDen / den1;
     		int multiplier2 = commonDen / den2;
     		int newNum1 = num1 * multiplier1;
     		int newNum2 = num2 * multiplier2;
-    		if (add)
+    		if (add) // Add the numerators
     			newNum = newNum1 + newNum2;
-    		else
+    		else // Subtract the numerators
     			newNum = newNum1 - newNum2;
     	}
     	else { // The denominators are the same
     		commonDen = den1;
-    		if (add)
+    		if (add) // Add the numerators
     			newNum = num1 + num2;
-    		else
+    		else // Subtract the numerators
     			newNum = num1 - num2;
     	}
-    	return(newNum + "/" + commonDen);
+    	
+    	// Reduce the result to its simplest form or lowest terms
+    	int divisor = greatestCommonDivisor(newNum, commonDen);
+    	int reducedNum = newNum / divisor;
+    	int reducedDen = commonDen / divisor;
+    	if (Math.abs(reducedNum) > Math.abs(reducedDen)) { // Intermediate result is an improper fraction
+    		int finalWhole = reducedNum / reducedDen;
+    		int finalNum = Math.abs(reducedNum) % Math.abs(reducedDen);
+    		int finalDen = Math.abs(reducedDen);
+    		if (finalNum == 0) // Result is an integer
+    			return(Integer.toString(finalWhole));
+    		else //  Result is a mixed number
+    			return(finalWhole + "_" + finalNum + "/" + finalDen);
+    	}
+    	else if (reducedNum == 0) // Result is zero
+    		return(Integer.toString(0));
+    	else if (reducedDen == 1) // Result is an integer
+     		return(Integer.toString(reducedNum));
+    	else // Result is a fraction
+    		return(reducedNum + "/" + reducedDen);
     }
     
+    /**
+     * Calculate the product or quotient of the expression.
+     */
     public static String multiplyOrDivide(int whole1, int num1, int den1, int whole2, int num2, int den2, boolean multiply) {
     	int newNum;
     	int newDen;
     	if (num1 == 0) // The first operand is an integer
     		num1 = whole1;
     	else
-    		if ((whole1 != 0) && (num1 != 0)) { // The first operand is a mixed number
+    		if ((whole1 != 0) && (num1 != 0)) { // The first operand is a mixed number.  Convert it to an improper fraction before calculating.
     			num1 = (den1 * Math.abs(whole1)) + num1;
     			if (whole1 < 0)
-    					num1 *= -1;
+    				num1 *= -1;
 			}
     	if (num2 == 0) // The second operand is an integer
     		num2 = whole2;
     	else
-    		if ((whole2 != 0) && (num2 != 0)) { // The second operand is a mixed number
+    		if ((whole2 != 0) && (num2 != 0)) { // The second operand is a mixed number.  Convert it to an improper fraction before calculating.
     			num2 = (den2 * Math.abs(whole2)) + num2;
     			if (whole2 < 0)
-    					num2 *= -1;
+    				num2 *= -1;
 			}
-    	if (multiply) {
+    	if (multiply) { // When multiplying fractions, multiply the numerators and then separately multiply the denominators
     		newNum = num1 * num2;
     		newDen = den1 * den2;
     	}
@@ -155,24 +174,35 @@ public class FracCalc {
     		newNum = num1 * den2;
     		newDen = den1 * num2;
     	}
-    	return(newNum + "/" + newDen);
-    }
-    
-    /* public static String improperToMixed(String fraction) {
-    	int num;
-    	int den;
-    	if (num > den) {
-    		int whole = num / den;
-    		int numerator = num - (whole * den);
+    	if (newNum > 0 && newDen < 0) { // When a fraction is negative, the numerator should be negative and the denominator should be positive
+    		newNum *= -1;
+    		newDen *= -1;
     	}
+    	
+    	// Reduce the result to its simplest form or lowest terms
+    	int divisor = greatestCommonDivisor(newNum, newDen);
+    	int reducedNum = newNum / divisor;
+    	int reducedDen = newDen / divisor;
+     	if (Math.abs(reducedNum) > Math.abs(reducedDen)) { // Intermediate result is an improper fraction
+    		int finalWhole = reducedNum / reducedDen;
+    		int finalNum = Math.abs(reducedNum) % Math.abs(reducedDen);
+    		int finalDen = Math.abs(reducedDen);
+    		if (finalNum == 0) // Result is an integer
+    			return(Integer.toString(finalWhole));
+    		else //  Result is a mixed number
+    			return(finalWhole + "_" + finalNum + "/" + finalDen);
+    	}
+    	else if (reducedNum == 0) // Result is zero
+    		return(Integer.toString(0));
+     	else if (reducedDen == 1) // Result is an integer
+     		return(Integer.toString(reducedNum));
+    	else // Result is a fraction
+    		return(reducedNum + "/" + reducedDen);
     }
-    */
 
-    // TODO: Fill in the space below with helper methods
-    
     /**
      * greatestCommonDivisor - Find the largest integer that evenly divides two integers.
-     *      Use this helper method in the Final Checkpoint to reduce fractions.
+     *      Use this helper method to reduce fractions.
      *      Note: There is a different (recursive) implementation in BJP Chapter 12.
      * @param a - First integer.
      * @param b - Second integer.
@@ -193,7 +223,7 @@ public class FracCalc {
     
     /**
      * leastCommonMultiple - Find the smallest integer that can be evenly divided by two integers.
-     *      Use this helper method in Checkpoint 3 to evaluate expressions.
+     *      Use this helper method to evaluate expressions.
      * @param a - First integer.
      * @param b - Second integer.
      * @return The LCM.
